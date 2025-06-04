@@ -1,0 +1,222 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// ————— ENUMS —————
+
+enum SectionType {
+  QUESTIONS
+  OBJECTIVES
+}
+
+enum QuestionType {
+  RatingScale
+  FreeText
+}
+
+enum LevelEnum {
+  Leadership
+  Manager
+  Supervisory
+  IC
+}
+
+enum CategoryEnum {
+  Technical
+  NonTechnical
+}
+
+enum QuestionnaireType {
+  Self
+  Manager
+  Upwards
+  Peer
+}
+
+enum StatusEnum {
+  DRAFT
+  SUBMITTED
+}
+
+/// ————— DATA MODELS —————
+
+///
+/// 1) Cycle: a review window (e.g. “2025 Mid-Year Technical”)
+///
+model Cycle {
+  id        String   @id @default(uuid())
+  name      String // e.g. “2025 Mid-Year”
+  startDate DateTime
+  endDate   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Each Cycle can have multiple Questionnaires (Self, Manager, Peer, etc.)
+  Questionnaire Questionnaire[]
+
+  // Link to employees who are participants in this cycle
+  participants Participant[]
+}
+
+///
+/// 2) Questionnaire: tied to one Cycle + role‐level + category + type
+///
+model Questionnaire {
+  id        String            @id @default(uuid())
+  name      String // e.g. “IC – 2025 End-Year Technical – Self”
+  level     LevelEnum
+  category  CategoryEnum
+  cycleId   String
+  type      QuestionnaireType
+  isActive  Boolean           @default(true)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  cycle     Cycle         @relation(fields: [cycleId], references: [id])
+  sections  Section[]
+  responses ResponseSet[]
+}
+
+///
+/// 3) Section: one of three sections in a Questionnaire (Values, Competencies, Objectives)
+///
+model Section {
+  id              String      @id @default(uuid())
+  questionnaireId String
+  title           String // “Values” | “Competencies” | “Objectives”
+  type            SectionType // QUESTIONS or OBJECTIVES
+  orderIndex      Int // 1, 2, or 3
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  questionnaire    Questionnaire     @relation(fields: [questionnaireId], references: [id])
+  sectionQuestions SectionQuestion[]
+}
+
+///
+/// 4) Question: reusable question text (e.g. “Adaptability” or “Process Thinking”)
+///
+model Question {
+  id        String       @id @default(uuid())
+  text      String
+  type      QuestionType
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  sectionQuestions SectionQuestion[]
+}
+
+///
+/// 5) SectionQuestion: link between Section and Question, with orderIndex & required flag
+///
+model SectionQuestion {
+  id         String   @id @default(uuid())
+  sectionId  String
+  questionId String
+  orderIndex Int
+  required   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  section  Section  @relation(fields: [sectionId], references: [id])
+  question Question @relation(fields: [questionId], references: [id])
+  answers  Answer[]
+}
+
+///
+/// 6) Employee: each user with AD, plus “role” that maps into LevelEnum + CategoryEnum
+///
+model Employee {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  role      String // arbitrary string, e.g. “SoftwareEngineer”, “TeamLead”
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Reverse lookups:
+  //  - Which Cycle(s) they participate in
+  participants Participant[]
+  //  - Their ResponseSets (self, manager, peer, etc.)
+  responses    ResponseSet[]
+}
+
+///
+/// 7) RoleMapping: maps a string “role” to a LevelEnum & CategoryEnum
+///
+model RoleMapping {
+  id        String       @id @default(uuid())
+  role      String       @unique // must match Employee.role
+  level     LevelEnum
+  category  CategoryEnum
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+///
+/// 8) Participant: join table linking Employee <→> Cycle
+///
+model Participant {
+  id         String   @id @default(uuid())
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  employeeId String
+  cycle      Cycle    @relation(fields: [cycleId], references: [id])
+  cycleId    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  @@unique([employeeId, cycleId], name: "unique_employee_cycle")
+}
+
+///
+/// 9) ResponseSet: one user’s responses to one Questionnaire
+///
+model ResponseSet {
+  id              String        @id @default(uuid())
+  userId          String // references Employee.id
+  questionnaire   Questionnaire @relation(fields: [questionnaireId], references: [id])
+  questionnaireId String
+  status          StatusEnum    @default(DRAFT)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @default(now()) @updatedAt
+  submittedAt     DateTime?
+
+  // Relations
+  employee           Employee            @relation(fields: [userId], references: [id])
+  answers            Answer[]
+  responseObjectives ResponseObjective[]
+}
+
+///
+/// 10) Answer: a single rating/text answer tied to a SectionQuestion
+///
+model Answer {
+  id                String          @id @default(uuid())
+  responseSet       ResponseSet     @relation(fields: [responseSetId], references: [id])
+  responseSetId     String
+  sectionQuestion   SectionQuestion @relation(fields: [sectionQuestionId], references: [id])
+  sectionQuestionId String
+  ratingValue       Int?
+  textValue         String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @default(now()) @updatedAt
+}
+
+///
+/// 11) ResponseObjective: up to 3 objectives (description + KPI text) in Section 3
+///
+model ResponseObjective {
+  id             String      @id @default(uuid())
+  responseSet    ResponseSet @relation(fields: [responseSetId], references: [id])
+  responseSetId  String
+  objectiveIndex Int // 1, 2, or 3
+  description    String
+  kpiText        String
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @default(now()) @updatedAt
+}

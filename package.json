@@ -1,0 +1,31 @@
+{
+  "name": "review-app",
+  "version": "1.0.0",
+  "description": "A Next.js & Prisma-based Performance Review app that lets employees and managers complete multi-section questionnaires (Values, Competencies, Objectives), save drafts, submit reviews, and integrates with Azure AD for authentication.",
+  "repository": {
+    "type": "git",
+    "url": "https://Yuvo@dev.azure.com/Yuvo/Novelus%20-%20HR/_git/NovelusPRApp"
+  },
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.8.2",
+    "next": "15.3.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.3",
+    "prisma": "^6.8.2",
+    "typescript": "^5"
+  }
+}

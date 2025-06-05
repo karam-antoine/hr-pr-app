@@ -10,7 +10,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "migrate": "prisma migrate dev",
+    "seed": "node prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.8.2",

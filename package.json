@@ -6,13 +6,16 @@
     "type": "git",
     "url": "https://Yuvo@dev.azure.com/Yuvo/Novelus%20-%20HR/_git/NovelusPRApp"
   },
+  "prisma": {
+    "seed": "ts-node --esm prisma/seed.ts"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "migrate": "prisma migrate dev",
-    "seed": "node prisma/seed.ts"
+    "seed": "prisma db seed"
   },
   "dependencies": {
     "@prisma/client": "^6.8.2",

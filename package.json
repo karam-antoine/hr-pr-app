@@ -6,26 +6,24 @@
     "type": "git",
     "url": "https://Yuvo@dev.azure.com/Yuvo/Novelus%20-%20HR/_git/NovelusPRApp"
   },
-  "prisma": {
-    "seed": "ts-node --esm prisma/seed.ts"
-  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "migrate": "prisma migrate dev",
-    "seed": "prisma db seed"
+    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.8.2",
     "next": "15.3.3",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "ts-node": "latest"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@types/node": "^20",
+    "@types/node": "latest",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

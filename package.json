@@ -12,14 +12,13 @@
     "start": "next start",
     "lint": "next lint",
     "migrate": "prisma migrate dev",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "node  prisma/seed.js"
   },
   "dependencies": {
     "@prisma/client": "^6.8.2",
     "next": "15.3.3",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "ts-node": "latest"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

@@ -1,24 +1,24 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-import { prisma } from "@/lib/prisma";
-import type { QuestionnaireDTO } from "@/types/questionnaire";
-import { toQuestionnaireDTO } from "@/mappers/questionnaireMapper";
+import { prisma } from '@/lib/prisma';
+import type { QuestionnaireDTO } from '@/types/questionnaire';
+import { toQuestionnaireDTO } from '@/mappers/questionnaireMapper';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;
+  const { id } = await params;
 
   const questionnaire = await prisma.questionnaire.findUnique({
     where: { id },
     include: {
       sections: {
-        orderBy: { orderIndex: "asc" },
+        orderBy: { orderIndex: 'asc' },
         include: {
           sectionQuestions: {
-            orderBy: { orderIndex: "asc" },
+            orderBy: { orderIndex: 'asc' },
             include: { question: true },
           },
         },
@@ -28,7 +28,7 @@ export async function GET(
 
   if (!questionnaire) {
     return NextResponse.json(
-      { error: "Questionnaire not found" },
+      { error: 'Questionnaire not found' },
       { status: 404 }
     );
   }

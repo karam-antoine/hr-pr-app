@@ -1,8 +1,11 @@
-export default function HomePage() {
-  return (
-    <main className="container py-4">
-      <h1 className="text-center">Performance Review App</h1>
-      <p className="text-center text-muted">Your questionnaire will appear here.</p>
-    </main>
-  );
+import { getServerSession } from 'next-auth';
+import { redirect } from 'next/navigation';
+import { authOptions } from './api/auth/[...nextauth]/route';
+
+export default async function HomePage() {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    redirect('/api/auth/signin?callbackUrl=/');
+  }
+  return <main>Welcome, {session.user!.name}!</main>;
 }

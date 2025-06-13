@@ -1,14 +1,16 @@
-// import 'bootstrap/dist/css/bootstrap.min.css'; 
+'use client';
 
-export const metadata = {
-  title: 'Review App',
-  description: 'Performance Review Application',
-};
+import { SessionProvider } from 'next-auth/react';
+
+import AuthGuard from '@/components/AuthGuard';
+
+import '@/styles/globals.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
@@ -16,7 +18,9 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body>
-        {children}
+        <SessionProvider>
+          <AuthGuard>{children}</AuthGuard>
+        </SessionProvider>
       </body>
     </html>
   );

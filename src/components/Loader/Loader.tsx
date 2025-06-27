@@ -1,14 +1,14 @@
 'use client';
 
 import React from 'react';
-import styles from './Loader.module.css';
+import classes from './Loader.module.scss';
 
 export default function Loader() {
   return (
-    <div className={styles.overlay}>
-      <div className={styles.content}>
-        <div className={styles.spinner} />
-        <div className={styles.text}>NOVELUS</div>
+    <div className={classes.overlay}>
+      <div className={classes.content}>
+        <div className={classes.spinner} />
+        <div className={classes.text}>NOVELUS</div>
       </div>
     </div>
   );

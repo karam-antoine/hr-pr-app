@@ -19,7 +19,9 @@ export default function RootLayout({
       </head>
       <body>
         <SessionProvider>
-          <AuthGuard>{children}</AuthGuard>
+          <AuthGuard>
+            <div className="main-container">{children}</div>
+          </AuthGuard>
         </SessionProvider>
       </body>
     </html>

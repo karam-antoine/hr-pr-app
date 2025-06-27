@@ -1,0 +1,70 @@
+.wrapper {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+
+  h2 {
+    margin: 0;
+  }
+
+  button {
+    margin-left: 0.75rem;
+  }
+}
+
+.sectionCard {
+  margin-bottom: 1.5rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--color-text-primary);
+  }
+
+  .questionRow {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    .questionText {
+      flex: 2;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .radioGroup {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    textarea {
+      flex: 1;
+    }
+  }
+
+  .objectivesSection {
+    display: flex;
+    flex-direction: column;
+
+    .objectiveRow {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+
+      .objectiveInput {
+        flex: 2;
+      }
+      .kpiInput {
+        flex: 1;
+      }
+    }
+  }
+}

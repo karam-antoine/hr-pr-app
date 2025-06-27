@@ -7,7 +7,7 @@ import {
   SectionQuestionDTO,
 } from '@/types/questionnaire';
 import { Form, Card, Button } from 'react-bootstrap';
-import styles from './Questionnaire.module.scss';
+import classes from './Questionnaire.module.scss';
 import { QuestionTypes, SectionTypes } from '@/types/enums';
 
 interface Props {
@@ -56,8 +56,8 @@ export default function QuestionnaireClient({ questionnaire }: Props) {
   };
 
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.header}>
+    <div className={classes.wrapper}>
+      <div className={classes.header}>
         <h2>{questionnaire.name}</h2>
         <div>
           <Button variant="outline-secondary" onClick={handleSave}>
@@ -70,7 +70,7 @@ export default function QuestionnaireClient({ questionnaire }: Props) {
       </div>
 
       {questionnaire.sections.map((section: SectionDTO) => (
-        <Card key={section.id} className={styles.sectionCard}>
+        <Card key={section.id} className={classes.sectionCard}>
           <Card.Header>
             <h3>{section.title}</h3>
           </Card.Header>
@@ -78,12 +78,12 @@ export default function QuestionnaireClient({ questionnaire }: Props) {
             {section.type === SectionTypes.QUESTIONS ? (
               <Form>
                 {section.sectionQuestions.map((sq: SectionQuestionDTO) => (
-                  <div key={sq.id} className={styles.questionRow}>
-                    <Form.Label className={styles.questionText}>
+                  <div key={sq.id} className={classes.questionRow}>
+                    <Form.Label className={classes.questionText}>
                       {sq.question.text}
                     </Form.Label>
                     {sq.question.type === QuestionTypes.RatingScale ? (
-                      <div className={styles.radioGroup}>
+                      <div className={classes.radioGroup}>
                         {[1, 2, 3, 4].map((val) => (
                           <Form.Check
                             inline
@@ -109,12 +109,12 @@ export default function QuestionnaireClient({ questionnaire }: Props) {
                 ))}
               </Form>
             ) : (
-              <div className={styles.objectivesSection}>
+              <div className={classes.objectivesSection}>
                 {objectives.map((obj, idx) => (
-                  <div key={idx} className={styles.objectiveRow}>
+                  <div key={idx} className={classes.objectiveRow}>
                     <Form.Control
                       placeholder={`Objective #${idx + 1}`}
-                      className={styles.objectiveInput}
+                      className={classes.objectiveInput}
                       value={obj.description}
                       onChange={(e) =>
                         onObjectiveChange(idx, 'description', e.target.value)
@@ -122,7 +122,7 @@ export default function QuestionnaireClient({ questionnaire }: Props) {
                     />
                     <Form.Control
                       placeholder="KPI"
-                      className={styles.kpiInput}
+                      className={classes.kpiInput}
                       value={obj.kpi}
                       onChange={(e) =>
                         onObjectiveChange(idx, 'kpi', e.target.value)

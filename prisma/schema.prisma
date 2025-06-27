@@ -55,13 +55,14 @@ model Cycle {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  role      String
-  managerId String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  role          String
+  isSystemAdmin Boolean  @default(false)
+  managerId     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   manager               User?                          @relation("UserToManager", fields: [managerId], references: [id])
   reports               User[]                         @relation("UserToManager")

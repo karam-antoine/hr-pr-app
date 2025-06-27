@@ -152,7 +152,6 @@ export default function DashboardClient({ active, past }: Props) {
         </Card>
       )}
 
-      {/* If we have an active cycle, render assignments for it */}
       {usingActive && (
         <Card className={classes.assignmentsSection}>
           <div className={classes.assignmentsHeader}>

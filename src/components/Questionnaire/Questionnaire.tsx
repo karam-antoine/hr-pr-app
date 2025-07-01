@@ -69,7 +69,7 @@ export default function QuestionnaireClient({ questionnaire }: Props) {
         </div>
       </div>
 
-      {questionnaire.sections.map((section: SectionDTO) => (
+      {questionnaire.sections?.map((section: SectionDTO) => (
         <Card key={section.id} className={classes.sectionCard}>
           <Card.Header>
             <h3>{section.title}</h3>

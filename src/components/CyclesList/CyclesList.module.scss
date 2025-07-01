@@ -1,7 +1,6 @@
 .page {
   padding: 2rem;
-  margin: auto;
-  width: 80%;
+
   .header {
     display: flex;
     justify-content: space-between;
@@ -14,50 +13,39 @@
       margin: 0;
     }
 
-    .createButton {
-      background-color: var(--color-brand);
-      color: var(--color-white);
-      border: none;
-      padding: 0.5rem 1rem;
-      font-size: 0.9rem;
-      font-weight: 500;
-      border-radius: 0.25rem;
-      cursor: pointer;
+    .actions {
+      display: flex;
+      align-items: center;
+    }
 
+    .createButton {
+      background: var(--color-brand);
+      border: none;
+      color: var(--color-white);
+      padding: 0.5rem 1rem;
+      font-weight: 500;
       &:hover {
-        background-color: var(--color-brand);
-        opacity: 0.85;
+        opacity: 0.9;
       }
     }
   }
 
-  .tableWrapper {
-    background: var(--color-white);
+  .card {
     border: 1px solid var(--color-grey-200);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
     border-radius: 0.5rem;
     overflow: hidden;
   }
 
   .table {
     margin: 0;
-
-    thead {
-      background: var(--color-grey-100);
-    }
-
     th,
     td {
       padding: 1rem;
       vertical-align: middle;
-      color: var(--color-text-primary);
     }
-
-    tbody tr:hover {
+    thead {
       background: var(--color-grey-50);
-    }
-
-    .actions {
-      text-align: right;
     }
   }
 }

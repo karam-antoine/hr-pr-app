@@ -344,7 +344,7 @@ async function main() {
     create: {
       name: "Antoine Karam",
       email: "antoine.karam@yuvo.com",
-      role: "TechLead",
+      role: "Engineering Lead - Software Engineering",
     },
   });
   const joseph = await prisma.user.upsert({
@@ -353,7 +353,7 @@ async function main() {
     create: {
       name: "Joseph Njeim",
       email: "joseph.njeim@yuvo.com",
-      role: "BusinessAnalyst",
+      role: "Business Analyst",
     },
   });
   const rayan = await prisma.user.upsert({
@@ -362,7 +362,7 @@ async function main() {
     create: {
       name: "Rayan Arab",
       email: "rayan.arab@yuvo.com",
-      role: "SeniorProductManager",
+      role: "Senior Product Manager",
     },
   });
 
@@ -372,7 +372,7 @@ async function main() {
     create: {
       name: "Mira Bou Alia",
       email: "mira.boualia@yuvo.com",
-      role: "SeniorManager",
+      role: "Senior Manager",
     },
   });
 
@@ -597,7 +597,7 @@ async function main() {
   ];
   for (const { level, category } of combos) {
     for (const qType of [QuestionnaireType.Self, QuestionnaireType.Manager]) {
-      const name = `${cycle.name}-${level}-${category}-${qType}`;
+      const name = `${level}-${category}-${qType}`;
       let questionnaire = await prisma.questionnaire.findFirst({
         where: { name, version: 1 },
       });
@@ -610,7 +610,6 @@ async function main() {
             category,
             type: qType,
             isActive: true,
-            cycle: { connect: { id: cycle.id } },
           },
         });
       }

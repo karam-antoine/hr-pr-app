@@ -41,12 +41,7 @@ export default function DashboardClient({ active, past }: Props) {
     : 0;
 
   return (
-    <Container fluid className={classes.dashboard}>
-      <h1 className={classes.title}>Dashboard</h1>
-      <p className={classes.subtitle}>
-        Welcome back! Here&apos;s your review progress overview.
-      </p>
-
+    <Container className={classes.dashboard}>
       <Row className={classes.summaryGrid}>
         {[
           { icon: <FaClock />, value: notStarted, label: 'Not Started' },

@@ -13,7 +13,7 @@ import {
 
 import MultiSelectList from "../MultiSelectList/MultiSelectList";
 
-import styles from "./CycleForm.module.scss";
+import classes from "./CycleForm.module.scss";
 
 type User = { id: string; name: string };
 type Questionnaire = {
@@ -90,9 +90,9 @@ export default function CycleForm({ users, questionnaires }: Props) {
   };
 
   return (
-    <Container className={styles.page}>
-      <Card className={styles.card}>
-        <Card.Header className={styles.header}>
+    <Container className={classes.page}>
+      <Card className={classes.card}>
+        <Card.Header className={classes.header}>
           <h3>Create New Review Cycle</h3>
         </Card.Header>
         <Card.Body>

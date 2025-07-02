@@ -108,7 +108,7 @@ export default function CyclesList({
         onClose={() => setShowModal(false)}
         onCreated={() => {
           setShowModal(false);
-          refreshCycles(); // re-fetch or re-render list
+          refreshCycles();
         }}
         users={users}
         questionnaires={questionnaires}

@@ -1,16 +1,5 @@
 .dashboard {
   padding: 2rem;
-  height: 100vh;
-  .title {
-    font-size: 2rem;
-    color: var(--color-text-primary);
-    margin-bottom: 0.5rem;
-  }
-
-  .subtitle {
-    color: var(--color-text-secondary);
-    margin-bottom: 2rem;
-  }
 
   .emptyState {
     padding: 2rem;

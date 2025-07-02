@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import {
   Container,
   Card,
@@ -31,26 +31,28 @@ export default function CyclesList({
   const [filter, setFilter] = useState('');
   const [showModal, setShowModal] = useState(false);
 
-  useEffect(() => {
-    refreshCycles();
-  }, []);
-  const refreshCycles = () => {
+  const refreshCycles = useCallback(() => {
     return fetch('/api/admin/cycles')
       .then((res) => res.json())
       .then(setCycles);
-  };
+  }, []);
+
+  useEffect(() => {
+    refreshCycles();
+  }, [refreshCycles]);
   const displayed = useMemo(
     () =>
       cycles.filter((c) => c.name.toLowerCase().includes(filter.toLowerCase())),
     [cycles, filter]
   );
-  const onCreateClick = () => {
+  const onCreateClick = useCallback(() => {
     setShowModal(true);
-  };
-  const onUpdateClick = (cycleId: string) => {
+  }, []);
+
+  const onUpdateClick = useCallback((id: string) => {
     setShowModal(true);
-    setCycleId(cycleId);
-  };
+    setCycleId(id);
+  }, []);
 
   return (
     <>

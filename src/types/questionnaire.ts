@@ -4,7 +4,7 @@ import {
   QuestionnaireTypes,
   QuestionTypes,
   SectionTypes,
-} from "./enums";
+} from './enums';
 
 export interface QuestionDTO {
   id: string;
@@ -19,7 +19,6 @@ export interface SectionQuestionDTO {
   required: boolean;
   question: QuestionDTO;
 }
-
 export interface SectionDTO {
   id: string;
   title: string;
@@ -35,5 +34,9 @@ export interface QuestionnaireDTO {
   category: Categories;
   type: QuestionnaireTypes;
   isActive: boolean;
-  sections: SectionDTO[];
+  sections?: SectionDTO[];
+}
+export interface UserDTO {
+  id: string;
+  name: string;
 }

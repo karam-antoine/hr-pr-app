@@ -49,19 +49,19 @@ model Cycle {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Questionnaires Questionnaire[]
   participants   CycleParticipant[]
   assignments    CycleQuestionnaireAssignment[]
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  role      String
-  managerId String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  role          String
+  isSystemAdmin Boolean  @default(false)
+  managerId     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   manager               User?                          @relation("UserToManager", fields: [managerId], references: [id])
   reports               User[]                         @relation("UserToManager")
@@ -89,8 +89,6 @@ model Questionnaire {
   isActive    Boolean                        @default(true)
   createdAt   DateTime                       @default(now())
   updatedAt   DateTime                       @updatedAt
-  cycleId     String
-  cycle       Cycle                          @relation(fields: [cycleId], references: [id])
   sections    Section[]
   assignments CycleQuestionnaireAssignment[]
 

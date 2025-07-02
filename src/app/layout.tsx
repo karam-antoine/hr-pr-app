@@ -3,6 +3,7 @@
 import { SessionProvider } from 'next-auth/react';
 
 import AuthGuard from '@/components/AuthGuard';
+import AppNavbar from '@/components/Navbar/Navbar';
 
 import '@/styles/globals.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -19,7 +20,10 @@ export default function RootLayout({
       </head>
       <body>
         <SessionProvider>
-          <AuthGuard>{children}</AuthGuard>
+          <AuthGuard>
+            <AppNavbar />
+            <div className="main-container">{children}</div>
+          </AuthGuard>
         </SessionProvider>
       </body>
     </html>

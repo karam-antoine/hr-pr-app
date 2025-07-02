@@ -14,7 +14,6 @@ const AuthGuard: React.FC<{ children: ReactNode }> = ({ children }) => {
   }, [status]);
 
   if (status === 'loading' || status === 'unauthenticated') {
-    console.log('status', status);
     return <Loader />;
   }
 

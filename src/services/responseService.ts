@@ -65,7 +65,6 @@ export async function saveOrUpdateResponseSet(
         responseSet: { connect: { id: responseSetRecord.id } },
         objectiveIndex: obj.objectiveIndex,
         description: obj.description,
-        // We link KPIs to this new objective:
         kpis: {
           create: obj.kpis.map((k) => ({
             text: k.text,
@@ -73,9 +72,8 @@ export async function saveOrUpdateResponseSet(
           })),
         },
       },
-      include: { kpis: true }, // so we can map them later if needed
+      include: { kpis: true }, 
     });
-    // Note: we don’t need to do anything else here, just creating implicitly.
   }
 
   const full = await prisma.responseSet.findUnique({
@@ -92,6 +90,5 @@ export async function saveOrUpdateResponseSet(
     throw new Error("Failed to fetch ResponseSet after saving");
   }
 
-  // 7) Convert to DTO and return
   return toResponseSetDTO(full);
 }

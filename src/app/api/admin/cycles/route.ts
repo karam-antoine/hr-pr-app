@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 import {
   createCycleWithAssignments,
   listCycles,
-} from "@/services/cycleService";
+} from '@/services/cycleService';
 
 export async function GET() {
   const cycles = await listCycles();
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       !Array.isArray(participantIds) ||
       !Array.isArray(questionnaireIds)
     ) {
-      return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
     }
 
     const cycle = await createCycleWithAssignments({
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     return NextResponse.json(
-      { error: e.message || "Unknown error" },
+      { error: e.message || 'Unknown error' },
       { status: 500 }
     );
   }

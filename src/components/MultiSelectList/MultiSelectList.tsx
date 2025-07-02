@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Form, InputGroup, ListGroup, Button } from 'react-bootstrap';
 
 interface Item {
@@ -13,6 +13,7 @@ interface Props {
   height?: number;
   groupName?: string;
   placeholder?: string;
+  initialSelected?: string[];
 }
 
 export default function MultiSelectList({
@@ -21,9 +22,12 @@ export default function MultiSelectList({
   height = 250,
   groupName = 'Ungrouped',
   placeholder = 'Search…',
+  initialSelected = [],
 }: Props) {
   const [search, setSearch] = useState('');
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [selected, setSelected] = useState<Set<string>>(
+    new Set(initialSelected)
+  );
 
   const filtered = useMemo(
     () =>
@@ -61,6 +65,10 @@ export default function MultiSelectList({
     setSelected(next);
     onChange(Array.from(next));
   }
+
+  useEffect(() => {
+    onChange(Array.from(selected));
+  }, [onChange, selected]);
 
   return (
     <>

@@ -9,11 +9,10 @@ import {
   InputGroup,
   FormControl,
 } from 'react-bootstrap';
-import Link from 'next/link';
 
 import { CycleDTO } from '@/types/assignment';
 import { QuestionnaireDTO, UserDTO } from '@/types/questionnaire';
-import CreateCycleModal from '@/components/CreateCycleModal/CreateCycleModal';
+import CycleModal from '@/components/CycleModal/CycleModal';
 
 import styles from './CyclesList.module.scss';
 interface Props {
@@ -28,6 +27,7 @@ export default function CyclesList({
   questionnaires,
 }: Props) {
   const [cycles, setCycles] = useState<CycleDTO[]>(initial);
+  const [cycleId, setCycleId] = useState<string | undefined>();
   const [filter, setFilter] = useState('');
   const [showModal, setShowModal] = useState(false);
 
@@ -46,6 +46,10 @@ export default function CyclesList({
   );
   const onCreateClick = () => {
     setShowModal(true);
+  };
+  const onUpdateClick = (cycleId: string) => {
+    setShowModal(true);
+    setCycleId(cycleId);
   };
 
   return (
@@ -84,11 +88,13 @@ export default function CyclesList({
                   <td>{new Date(c.startDate).toLocaleDateString()}</td>
                   <td>{new Date(c.endDate).toLocaleDateString()}</td>
                   <td className="text-end">
-                    <Link href={`/admin/cycles/${c.id}`} passHref>
-                      <Button size="sm" variant="outline-secondary">
-                        Edit
-                      </Button>
-                    </Link>
+                    <Button
+                      size="sm"
+                      variant="outline-secondary"
+                      onClick={() => onUpdateClick(c.id)}
+                    >
+                      Edit
+                    </Button>
                   </td>
                 </tr>
               ))}
@@ -103,15 +109,17 @@ export default function CyclesList({
           </Table>
         </Card>
       </Container>
-      <CreateCycleModal
+      <CycleModal
         show={showModal}
         onClose={() => setShowModal(false)}
-        onCreated={() => {
+        onSaved={() => {
           setShowModal(false);
+          setCycleId(undefined);
           refreshCycles();
         }}
         users={users}
         questionnaires={questionnaires}
+        cycleId={cycleId}
       />
     </>
   );

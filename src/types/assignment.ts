@@ -15,6 +15,14 @@ export interface CycleDTO {
   startDate: string;
   endDate: string;
 }
+export interface CycleDetailsDTO {
+  id: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  participantIds: string[];
+  questionnaireIds: string[];
+}
 
 export interface PastAssignmentDTO extends AssignmentDTO {
   cycleName: string;

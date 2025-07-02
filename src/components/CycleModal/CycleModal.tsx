@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Modal,
   Button,
@@ -63,14 +63,21 @@ export default function CycleModal({
       .finally(() => setLoading(false));
   }, [show, cycleId, isEdit]);
 
-  const userItems = users.map((u) => ({ id: u.id, label: u.name }));
-  const qItems = questionnaires.map((q) => ({
-    id: q.id,
-    label: q.name,
-    group: `${q.category} / ${q.level} / ${q.type}`,
-  }));
+  const userItems = useMemo(
+    () => users.map((u) => ({ id: u.id, label: u.name })),
+    [users]
+  );
+  const qItems = useMemo(
+    () =>
+      questionnaires.map((q) => ({
+        id: q.id,
+        label: q.name,
+        group: `${q.category} / ${q.level} / ${q.type}`,
+      })),
+    [questionnaires]
+  );
 
-  async function handleSave() {
+  const handleSave = useCallback(async () => {
     setError('');
     if (!name.trim() || !startDate || !endDate) {
       setError('Name, start date & end date are required.');
@@ -112,7 +119,7 @@ export default function CycleModal({
     } finally {
       setSaving(false);
     }
-  }
+  }, [cycleId, endDate, isEdit, name, onClose, onSaved, selectedQs, selectedUsers, startDate]);
 
   return (
     <Modal show={show} onHide={onClose} size="lg" centered>

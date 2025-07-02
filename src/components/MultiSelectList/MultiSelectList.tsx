@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Form, InputGroup, ListGroup, Button } from 'react-bootstrap';
 
 interface Item {
@@ -45,30 +45,30 @@ export default function MultiSelectList({
     return m;
   }, [filtered, groupName]);
 
-  const visible = filtered.map((i) => i.id);
+  const visible = useMemo(() => filtered.map((i) => i.id), [filtered]);
   const allVisible = visible.every((id) => selected.has(id));
-  function toggleSelectAll() {
+
+  const toggleSelectAll = useCallback(() => {
     const next = new Set(selected);
     if (allVisible) visible.forEach((id) => next.delete(id));
     else visible.forEach((id) => next.add(id));
     setSelected(next);
     onChange(Array.from(next));
-  }
+  }, [allVisible, onChange, selected, visible]);
 
-  function toggleOne(id: string) {
-    const next = new Set(selected);
-    if (next.has(id)) {
-      next.delete(id);
-    } else {
-      next.add(id);
-    }
-    setSelected(next);
-    onChange(Array.from(next));
-  }
-
-  useEffect(() => {
-    onChange(Array.from(selected));
-  }, [onChange, selected]);
+  const toggleOne = useCallback(
+    (id: string) => {
+      const next = new Set(selected);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      setSelected(next);
+      onChange(Array.from(next));
+    },
+    [onChange, selected]
+  );
 
   return (
     <>

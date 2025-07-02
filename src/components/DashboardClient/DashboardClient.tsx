@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import {
   FaStar,
@@ -24,6 +25,7 @@ interface Props {
 }
 
 export default function DashboardClient({ active, past }: Props) {
+  const router = useRouter();
   const usingActive = active.length > 0;
   const sourceAssignments: AssignmentDTO[] | PastAssignmentDTO[] = usingActive
     ? active.flatMap((c) => c.assignments)
@@ -134,9 +136,7 @@ export default function DashboardClient({ active, past }: Props) {
                 <Col xs="auto">
                   <Button
                     className={classes.assignmentButton}
-                    onClick={() =>
-                      (window.location.href = `/questionnaire/${a.id}`)
-                    }
+                    onClick={() => router.push(`/questionnaire/${a.id}`)}
                   >
                     View
                   </Button>
@@ -188,7 +188,7 @@ export default function DashboardClient({ active, past }: Props) {
                 <Button
                   className={classes.assignmentButton}
                   onClick={() =>
-                    (window.location.href = `/questionnaire/${a.questionnaireId}`)
+                    router.push(`/questionnaire/${a.questionnaireId}`)
                   }
                 >
                   {a.status === 'DRAFT' ? 'Continue' : 'Start'}

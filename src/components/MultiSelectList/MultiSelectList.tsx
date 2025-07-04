@@ -1,4 +1,9 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, {
+  useState,
+  useMemo,
+  useCallback,
+  useImperativeHandle,
+} from 'react';
 import { Form, InputGroup, ListGroup, Button } from 'react-bootstrap';
 
 interface Item {
@@ -6,23 +11,27 @@ interface Item {
   label: string;
   group?: string;
 }
+export interface MultiSelectListRef {
+  selected: string[];
+  setSelected: (ids: string[]) => void;
+}
 
 interface Props {
   items: Item[];
-  onChange: (selectedIds: string[]) => void;
   height?: number;
   groupName?: string;
   placeholder?: string;
   initialSelected?: string[];
+  ref: React.ForwardedRef<MultiSelectListRef>;
 }
 
 export default function MultiSelectList({
   items,
-  onChange,
   height = 250,
   groupName = 'Ungrouped',
   placeholder = 'Search…',
   initialSelected = [],
+  ref,
 }: Props) {
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Set<string>>(
@@ -53,8 +62,7 @@ export default function MultiSelectList({
     if (allVisible) visible.forEach((id) => next.delete(id));
     else visible.forEach((id) => next.add(id));
     setSelected(next);
-    onChange(Array.from(next));
-  }, [allVisible, onChange, selected, visible]);
+  }, [allVisible, selected, visible]);
 
   const toggleOne = useCallback(
     (id: string) => {
@@ -65,11 +73,18 @@ export default function MultiSelectList({
         next.add(id);
       }
       setSelected(next);
-      onChange(Array.from(next));
     },
-    [onChange, selected]
+    [selected]
   );
-
+  useImperativeHandle(ref, () => {
+    return {
+      selected: Array.from(selected),
+      setSelected: (ids: string[]) => {
+        const next = new Set(ids);
+        setSelected(next);
+      },
+    };
+  });
   return (
     <>
       <InputGroup className="mb-2">

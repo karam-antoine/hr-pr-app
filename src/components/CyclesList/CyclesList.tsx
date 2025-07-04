@@ -14,7 +14,7 @@ import { CycleDTO } from '@/types/assignment';
 import { QuestionnaireDTO, UserDTO } from '@/types/questionnaire';
 import CycleModal from '@/components/CycleModal/CycleModal';
 
-import styles from './CyclesList.module.scss';
+import classes from './CyclesList.module.scss';
 interface Props {
   cycles: CycleDTO[];
   users: UserDTO[];
@@ -56,10 +56,10 @@ export default function CyclesList({
 
   return (
     <>
-      <Container className={styles.page}>
-        <div className={styles.header}>
-          <h2 className={styles.title}>Review Cycles</h2>
-          <div className={styles.actions}>
+      <Container className={classes.page}>
+        <div className={classes.header}>
+          <h2 className={classes.title}>Review Cycles</h2>
+          <div className={classes.actions}>
             <InputGroup className="me-2">
               <FormControl
                 placeholder="Search cycles…"
@@ -67,14 +67,14 @@ export default function CyclesList({
                 onChange={(e) => setFilter(e.target.value)}
               />
             </InputGroup>
-            <Button className={styles.createButton} onClick={onCreateClick}>
+            <Button className={classes.createButton} onClick={onCreateClick}>
               Create
             </Button>
           </div>
         </div>
 
-        <Card className={styles.card}>
-          <Table hover striped responsive className={styles.table}>
+        <Card className={classes.card}>
+          <Table hover striped responsive className={classes.table}>
             <thead>
               <tr>
                 <th>Name</th>
@@ -113,7 +113,10 @@ export default function CyclesList({
       </Container>
       <CycleModal
         show={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={() => {
+          setShowModal(false);
+          setCycleId(undefined);
+        }}
         onSaved={() => {
           setShowModal(false);
           setCycleId(undefined);

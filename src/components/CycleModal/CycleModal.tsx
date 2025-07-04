@@ -1,6 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from 'react';
 import {
   Modal,
   Button,
@@ -11,7 +17,9 @@ import {
   Card,
   Spinner,
 } from 'react-bootstrap';
-import MultiSelectList from '../MultiSelectList/MultiSelectList';
+import MultiSelectList, {
+  MultiSelectListRef,
+} from '../MultiSelectList/MultiSelectList';
 import { QuestionnaireDTO, UserDTO } from '@/types/questionnaire';
 import { CycleDetailsDTO } from '@/types/assignment';
 
@@ -23,7 +31,14 @@ interface Props {
   questionnaires: QuestionnaireDTO[];
   cycleId?: string;
 }
-
+const initialCycle: CycleDetailsDTO = {
+  id: '',
+  name: '',
+  startDate: '',
+  endDate: '',
+  participantIds: [],
+  questionnaireIds: [],
+};
 export default function CycleModal({
   show,
   onClose,
@@ -32,19 +47,19 @@ export default function CycleModal({
   questionnaires,
   cycleId,
 }: Props) {
-  const isEdit = Boolean(cycleId);
-
+  const [cycle, setCycle] = useState<CycleDetailsDTO>(initialCycle);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const startDateRef = useRef<HTMLInputElement>(null);
+  const endDateRef = useRef<HTMLInputElement>(null);
+  const selectedParticipantsRef = useRef<MultiSelectListRef>(null);
+  const selectedQuestionnairesRef = useRef<MultiSelectListRef>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [name, setName] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  const [selectedQs, setSelectedQs] = useState<string[]>([]);
 
   useEffect(() => {
-    if (!show || !isEdit) return;
+    setCycle(initialCycle);
+    if (!show || cycleId == undefined) return;
 
     setLoading(true);
     fetch(`/api/admin/cycles/${cycleId}`)
@@ -53,15 +68,11 @@ export default function CycleModal({
         return res.json() as Promise<CycleDetailsDTO>;
       })
       .then((cycle) => {
-        setName(cycle.name);
-        setStartDate(cycle.startDate.slice(0, 10));
-        setEndDate(cycle.endDate.slice(0, 10));
-        setSelectedUsers(cycle.participantIds);
-        setSelectedQs(cycle.questionnaireIds);
+        setCycle(cycle);
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [show, cycleId, isEdit]);
+  }, [show, cycleId]);
 
   const userItems = useMemo(
     () => users.map((u) => ({ id: u.id, label: u.name })),
@@ -79,6 +90,11 @@ export default function CycleModal({
 
   const handleSave = useCallback(async () => {
     setError('');
+    const name = nameRef.current?.value.trim() || '';
+    const startDate = startDateRef.current?.value;
+    const endDate = endDateRef.current?.value;
+    const selectedUsers = selectedParticipantsRef.current?.selected || [];
+    const selectedQs = selectedQuestionnairesRef.current?.selected || [];
     if (!name.trim() || !startDate || !endDate) {
       setError('Name, start date & end date are required.');
       return;
@@ -94,8 +110,10 @@ export default function CycleModal({
 
     setSaving(true);
     try {
-      const url = isEdit ? `/api/admin/cycles/${cycleId}` : `/api/admin/cycles`;
-      const method = isEdit ? 'PUT' : 'POST';
+      const url = cycle.id
+        ? `/api/admin/cycles/${cycleId}`
+        : `/api/admin/cycles`;
+      const method = cycle.id ? 'PUT' : 'POST';
 
       const res = await fetch(url, {
         method,
@@ -119,13 +137,19 @@ export default function CycleModal({
     } finally {
       setSaving(false);
     }
-  }, [cycleId, endDate, isEdit, name, onClose, onSaved, selectedQs, selectedUsers, startDate]);
+  }, [cycle.id, cycleId, onClose, onSaved]);
+
+  const handleClose = useCallback(() => {
+    setCycle(initialCycle);
+    setError('');
+    onClose();
+  }, [onClose]);
 
   return (
-    <Modal show={show} onHide={onClose} size="lg" centered>
-      <Modal.Header closeButton>
+    <Modal show={show} onClose={handleClose} size="lg" centered>
+      <Modal.Header>
         <Modal.Title>
-          {isEdit ? 'Edit Review Cycle' : 'Create New Review Cycle'}
+          {cycle.id ? 'Edit Review Cycle' : 'Create New Review Cycle'}
         </Modal.Title>
       </Modal.Header>
 
@@ -145,8 +169,8 @@ export default function CycleModal({
                   <Form.Control
                     type="text"
                     placeholder="e.g. Q1 2026"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    defaultValue={cycle.name}
+                    ref={nameRef}
                   />
                 </Form.Group>
               </Col>
@@ -155,8 +179,8 @@ export default function CycleModal({
                   <Form.Label>Start Date</Form.Label>
                   <Form.Control
                     type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
+                    defaultValue={cycle.startDate.slice(0, 10)}
+                    ref={startDateRef}
                   />
                 </Form.Group>
               </Col>
@@ -165,8 +189,8 @@ export default function CycleModal({
                   <Form.Label>End Date</Form.Label>
                   <Form.Control
                     type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
+                    defaultValue={cycle.endDate.slice(0, 10)}
+                    ref={endDateRef}
                   />
                 </Form.Group>
               </Col>
@@ -176,11 +200,11 @@ export default function CycleModal({
               <Card.Body>
                 <Form.Label>Participants</Form.Label>
                 <MultiSelectList
-                  items={userItems}
-                  onChange={setSelectedUsers}
-                  placeholder="Search employees…"
                   height={200}
-                  initialSelected={selectedUsers}
+                  items={userItems}
+                  placeholder="Search employees…"
+                  ref={selectedParticipantsRef}
+                  initialSelected={cycle.participantIds}
                 />
               </Card.Body>
             </Card>
@@ -190,10 +214,10 @@ export default function CycleModal({
                 <Form.Label>Questionnaires</Form.Label>
                 <MultiSelectList
                   items={qItems}
-                  onChange={setSelectedQs}
                   placeholder="Search questionnaires…"
+                  ref={selectedQuestionnairesRef}
                   height={200}
-                  initialSelected={selectedQs}
+                  initialSelected={cycle.questionnaireIds}
                 />
               </Card.Body>
             </Card>
@@ -202,7 +226,7 @@ export default function CycleModal({
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="secondary" onClick={onClose} disabled={saving}>
+        <Button variant="secondary" onClick={handleClose} disabled={saving}>
           Cancel
         </Button>
         <Button
@@ -211,10 +235,10 @@ export default function CycleModal({
           disabled={saving || loading}
         >
           {saving
-            ? isEdit
+            ? cycle.id
               ? 'Saving…'
               : 'Creating…'
-            : isEdit
+            : cycle.id
             ? 'Save Changes'
             : 'Create & Assign'}
         </Button>

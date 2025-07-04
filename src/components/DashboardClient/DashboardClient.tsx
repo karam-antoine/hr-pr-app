@@ -1,21 +1,27 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import {
-  FaStar,
-  FaRegStar,
-  FaClock,
-  FaUserFriends,
-  FaListAlt,
-} from 'react-icons/fa';
+  Container,
+  Row,
+  Col,
+  Card,
+  Button,
+  ListGroup,
+  Carousel,
+} from 'react-bootstrap';
+import { FaStar, FaRegStar, FaClock, FaUserFriends } from 'react-icons/fa';
 import { differenceInCalendarDays } from 'date-fns';
-import type { AssignmentDTO, PastAssignmentDTO } from '@/types/assignment';
+import type {
+  AssignmentDTO,
+  CycleDTO,
+  PastAssignmentDTO,
+} from '@/types/assignment';
 import classes from './DashboardClient.module.scss';
 
 interface CycleBlock {
-  cycle: { name: string; startDate: string; endDate: string };
+  cycle: CycleDTO;
   assignments: AssignmentDTO[];
 }
 
@@ -26,176 +32,192 @@ interface Props {
 
 export default function DashboardClient({ active, past }: Props) {
   const router = useRouter();
-  const usingActive = active.length > 0;
-  const sourceAssignments: AssignmentDTO[] | PastAssignmentDTO[] = usingActive
-    ? active.flatMap((c) => c.assignments)
-    : past;
+  const [selectedIdx, setSelectedIdx] = useState(0);
 
-  const notStarted = sourceAssignments.filter((a) => a.status === 'DUE').length;
-  const inProgress = sourceAssignments.filter(
-    (a) => a.status === 'DRAFT'
-  ).length;
-  const completed = sourceAssignments.filter(
-    (a) => a.status === 'SUBMITTED'
-  ).length;
-  const daysLeft = usingActive
-    ? differenceInCalendarDays(new Date(active[0].cycle.endDate), new Date())
-    : 0;
+  const allActiveAssignments = useMemo(
+    () => active.flatMap((c) => c.assignments),
+    [active]
+  );
+  const stats = useMemo(
+    () => ({
+      notStarted: allActiveAssignments.filter((a) => a.status === 'DUE').length,
+      inProgress: allActiveAssignments.filter((a) => a.status === 'DRAFT')
+        .length,
+      completed: allActiveAssignments.filter((a) => a.status === 'SUBMITTED')
+        .length,
+    }),
+    [allActiveAssignments]
+  );
 
+  const daysLeft = useMemo(() => {
+    if (!active.length) return 0;
+    const earliest = active
+      .map((c) => new Date(c.cycle.endDate))
+      .reduce(
+        (min, d) => (d < min ? d : min),
+        new Date(active[0].cycle.endDate)
+      );
+    return differenceInCalendarDays(earliest, new Date());
+  }, [active]);
+
+  const statsConfig = useMemo(() => {
+    const arr = [
+      { icon: <FaClock />, value: stats.notStarted, label: 'Not Started' },
+      { icon: <FaStar />, value: stats.inProgress, label: 'In Progress' },
+      { icon: <FaRegStar />, value: stats.completed, label: 'Completed' },
+    ];
+    if (active.length) {
+      arr.push({ icon: <FaClock />, value: daysLeft, label: 'Days Left' });
+    }
+    return arr;
+  }, [stats, daysLeft, active.length]);
+
+  const handleSelect = useCallback((idx: number) => {
+    setSelectedIdx(idx);
+  }, []);
+  const handleStart = useCallback(
+    (assignment: AssignmentDTO) => {
+      router.push(`/questionnaire/${assignment.questionnaireId}`);
+    },
+    [router]
+  );
+
+  const current = active[selectedIdx];
   return (
-    <Container className={classes.dashboard}>
-      <Row className={classes.summaryGrid}>
-        {[
-          { icon: <FaClock />, value: notStarted, label: 'Not Started' },
-          { icon: <FaRegStar />, value: inProgress, label: 'In Progress' },
-          { icon: <FaStar />, value: completed, label: 'Completed' },
-          ...(usingActive
-            ? [{ icon: <FaClock />, value: daysLeft, label: 'Days Left' }]
-            : []),
-        ].map(({ icon, value, label }, i) => (
-          <Col key={i}>
-            <Card className={classes.summaryCard}>
-              <div className={classes.summaryIcon}>{icon}</div>
-              <div className={classes.summaryNumber}>{value}</div>
-              <div className={classes.summaryLabel}>{label}</div>
+    <Container className={classes.page}>
+      <Row className={classes.statsRow}>
+        {statsConfig.map(({ icon, value, label }) => (
+          <Col key={label} md={3}>
+            <Card className={classes.statCard}>
+              <Card.Body className="text-center">
+                <div className={classes.statIcon}>{icon}</div>
+                <div className={classes.statValue}>{value}</div>
+                <div className={classes.statLabel}>{label}</div>
+              </Card.Body>
             </Card>
           </Col>
         ))}
       </Row>
-
-      {usingActive && (
-        <Card className={classes.cycleBanner}>
-          <Row className="align-items-center">
-            <Col>
-              <div className={classes.cycleName}>{active[0].cycle.name}</div>
-              <div className={classes.cycleDates}>
-                {new Date(active[0].cycle.startDate).toLocaleDateString()} –{' '}
-                {new Date(active[0].cycle.endDate).toLocaleDateString()}
-              </div>
-              <div className={classes.cycleStats}>
-                <FaClock /> Active Cycle&nbsp;&nbsp;
-                <FaUserFriends /> {sourceAssignments.length} Reviews
-              </div>
-            </Col>
-            <Col xs="auto" className={classes.cycleProgressWrapper}>
-              <div className={classes.cycleProgressNumber}>
-                {Math.round((completed / sourceAssignments.length) * 100)}%
-              </div>
-              <div className={classes.cycleProgressLabel}>Complete</div>
-            </Col>
-          </Row>
+      {active.length ? (
+        <Carousel
+          activeIndex={selectedIdx}
+          onSelect={handleSelect}
+          className={classes.carousel}
+          interval={null}
+        >
+          {active.map(({ cycle, assignments }) => {
+            const pct = Math.round(
+              (assignments.filter((a) => a.status === 'SUBMITTED').length /
+                assignments.length) *
+                100
+            );
+            return (
+              <Carousel.Item key={cycle.id}>
+                <Card className={classes.activeCycleCard} body>
+                  <Row>
+                    <Col md={10}>
+                      <h4>{cycle.name}</h4>
+                      <div className={classes.dates}>
+                        {new Date(cycle.startDate).toLocaleDateString()} –{' '}
+                        {new Date(cycle.endDate).toLocaleDateString()}
+                      </div>
+                      <div className={classes.cycleMeta}>
+                        <FaClock /> <span>Active Cycle</span>
+                        <FaUserFriends />{' '}
+                        <span>{assignments.length} Reviews</span>
+                      </div>
+                    </Col>
+                    <Col md={2} className="text-end">
+                      <div className={classes.progressValue}>{pct}%</div>
+                      <div className={classes.progressLabel}>Complete</div>
+                    </Col>
+                  </Row>
+                </Card>
+              </Carousel.Item>
+            );
+          })}
+        </Carousel>
+      ) : (
+        <Card className={classes.noActiveCard}>
+          <Card.Body className="text-center">
+            <h5>No active cycles.</h5>
+          </Card.Body>
         </Card>
       )}
-
-      {!usingActive && (
-        <Card className={classes.assignmentsSection}>
-          <div className={classes.assignmentsHeader}>
-            <FaListAlt className="me-2" /> Past Reviews
-          </div>
-          {past.length === 0 ? (
-            <div className={classes.emptyState}>No past reviews found.</div>
-          ) : (
-            past.map((a) => (
-              <Row key={a.id} className={classes.assignmentRow}>
-                <Col className={classes.assignmentInfo}>
-                  <div className={classes.assignmentName}>
-                    {a.revieweeName} ({a.cycleName})
-                  </div>
-                  <div className={classes.assignmentDue}>
+      {current && (
+        <Card className={classes.assignmentsCard}>
+          <Card.Header>
+            Your Review Assignments for {current.cycle.name}
+          </Card.Header>
+          <ListGroup variant="flush">
+            {current.assignments.map((a) => (
+              <ListGroup.Item
+                key={a.id}
+                className="d-flex justify-content-between align-items-center"
+              >
+                <div>
+                  <strong>{a.revieweeName}</strong>
+                  <div className={classes.dueDate}>
                     Due: {new Date(a.dueDate).toLocaleDateString()}
                   </div>
-                </Col>
-                <Col xs="auto" className={classes.assignmentStatus}>
-                  {
+                </div>
+                <div className="text-end">
+                  <div className={classes.statusLabel}>
                     {
-                      DUE: (
-                        <span className={classes.statusDue}>Not Started</span>
-                      ),
-                      DRAFT: (
-                        <span className={classes.statusDraft}>In Progress</span>
-                      ),
-                      SUBMITTED: (
-                        <span className={classes.statusSubmitted}>
-                          Completed
-                        </span>
-                      ),
-                    }[a.status]
-                  }
-                </Col>
-                <Col xs="auto" className={classes.assignmentRating}>
-                  {a.rating != null
-                    ? Array.from({ length: 4 }).map((_, i) =>
-                        i < (a.rating ?? 0) ? (
-                          <FaStar key={i} color="var(--color-brand)" />
-                        ) : (
-                          <FaRegStar key={i} color="var(--color-grey-600)" />
-                        )
-                      )
-                    : '—'}
-                </Col>
-                <Col xs="auto">
+                      {
+                        DUE: 'Not Started',
+                        DRAFT: 'In Progress',
+                        SUBMITTED: 'Completed',
+                      }[a.status]
+                    }
+                  </div>
+                  <Button size="sm" onClick={() => handleStart(a)}>
+                    {a.status === 'DRAFT' ? 'Continue' : 'Start'}
+                  </Button>
+                </div>
+              </ListGroup.Item>
+            ))}
+          </ListGroup>
+        </Card>
+      )}
+      {past.length > 0 && (
+        <Card className={classes.pastCard}>
+          <Card.Header>Past Reviews</Card.Header>
+          <ListGroup variant="flush">
+            {past.map((p) => (
+              <ListGroup.Item
+                key={p.id}
+                className="d-flex justify-content-between align-items-center"
+              >
+                <div>
+                  <strong>{p.cycleName}</strong> — {p.revieweeName}
+                  <div className={classes.dueDate}>
+                    Completed on: {new Date(p.dueDate).toLocaleDateString()}
+                  </div>
+                </div>
+                <div className="text-end">
+                  <div className={classes.statusLabel}>
+                    {p.status === 'SUBMITTED' ? 'Completed' : p.status}
+                  </div>
+                  {p.rating != null && (
+                    <div className={classes.rating}>
+                      {/* notime for icons this passed the vibe check */}
+                      {'★'.repeat(p.rating) + '☆'.repeat(5 - p.rating)} 
+                    </div>
+                  )}
                   <Button
-                    className={classes.assignmentButton}
-                    onClick={() => router.push(`/questionnaire/${a.id}`)}
+                    size="sm"
+                    variant="outline-primary"
+                    onClick={() =>
+                      router.push(`/questionnaire/${p.questionnaireId}`)
+                    }
                   >
                     View
                   </Button>
-                </Col>
-              </Row>
-            ))
-          )}
-        </Card>
-      )}
-
-      {usingActive && (
-        <Card className={classes.assignmentsSection}>
-          <div className={classes.assignmentsHeader}>
-            Your Review Assignments for {active[0].cycle.name}
-          </div>
-          {active[0].assignments.map((a) => (
-            <Row key={a.id} className={classes.assignmentRow}>
-              <Col className={classes.assignmentInfo}>
-                <div className={classes.assignmentName}>{a.revieweeName}</div>
-                <div className={classes.assignmentDue}>
-                  Due: {new Date(a.dueDate).toLocaleDateString()}
                 </div>
-              </Col>
-              <Col xs="auto" className={classes.assignmentStatus}>
-                {
-                  {
-                    DUE: <span className={classes.statusDue}>Not Started</span>,
-                    DRAFT: (
-                      <span className={classes.statusDraft}>In Progress</span>
-                    ),
-                    SUBMITTED: (
-                      <span className={classes.statusSubmitted}>Completed</span>
-                    ),
-                  }[a.status]
-                }
-              </Col>
-              <Col xs="auto" className={classes.assignmentRating}>
-                {a.rating != null
-                  ? Array.from({ length: 4 }).map((_, i) =>
-                      i < (a.rating ?? 0) ? (
-                        <FaStar key={i} color="var(--color-brand)" />
-                      ) : (
-                        <FaRegStar key={i} color="var(--color-grey-600)" />
-                      )
-                    )
-                  : '—'}
-              </Col>
-              <Col xs="auto">
-                <Button
-                  className={classes.assignmentButton}
-                  onClick={() =>
-                    router.push(`/questionnaire/${a.questionnaireId}`)
-                  }
-                >
-                  {a.status === 'DRAFT' ? 'Continue' : 'Start'}
-                </Button>
-              </Col>
-            </Row>
-          ))}
+              </ListGroup.Item>
+            ))}
+          </ListGroup>
         </Card>
       )}
     </Container>
